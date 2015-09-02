@@ -6,14 +6,28 @@ var _ = require('lodash');
 router.get('/', function(req,res) {
     var client = new pg.Client(connect);
     client.connect(function(err) {
-        var data = [];
+        var winston = [];
+        var players = [];
+        var games = [];
         if (err) res.send({"status":"err","message":"could not connect to db"});
         var query = client.query("select * from game where player = 1");
         query.on('row',function(row) {
-            data.push(row)
+            winston.push(row)
         });
         query.on('end',function() {
-            res.send({"status":"success","data":data})
+            var query1 = client.query("select * from player");
+            query1.on('row',function(row) {
+                players.push(row);
+            });
+            query1.on('end',function() {
+                var query2 = client.query("select * from game");
+                query2.on('row',function(row) {
+                    games.push(row);
+                });
+                query2.on('end',function() {
+                    res.send({"status":"success","data":{"players":players,"games":games,"winston":winston}})
+                })
+            });
         })
     })
 });

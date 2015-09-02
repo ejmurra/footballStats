@@ -48,8 +48,8 @@
 <div class="row text-center" style="margin:20px auto;">
     <button class="column" ng-click="toggleInput()">Add game stats</button>
     <button class="large-6 column alert" ng-click="deleteRow()">Delete</button>
-    <select style="height:50px;" class="large-6 column">
-        <option id="row2delete" ng-repeat="game in gameStats | orderBy:'week'">Week: {{game.week}}</option>
+    <select id="row2delete" style="height:50px;" class="large-6 column">
+        <option ng-repeat="game in gameStats | orderBy:'week'">Week: {{game.week}}</option>
     </select>
 </div>
 
@@ -68,3 +68,23 @@
         </td>
     </tr>
 </table>
+
+<div class="row">
+    <button class="large-6 column" ng-click="ratePlayers()">Rank</button>
+    <select id="week2rate" style="height:50px;" class="large-6 column">
+        <option ng-repeat="num in maxGames()">Week: {{num}}</option>
+    </select>
+</div>
+
+<div ng-show="rated">
+    <table class="display-table">
+        <tr>
+            <th>Player</th>
+            <th>Rating</th>
+        </tr>
+        <tr id="{{player.id}}" ng-repeat="player in rated | orderBy: '-rating'">
+            <td>{{player.player}}</td>
+            <td>{{player.rating}}</td>
+        </tr>
+    </table>
+</div>
