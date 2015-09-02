@@ -3,8 +3,8 @@ angular.module('winston')
         this.addNew = function (item) {
             return $http.post('/api/stats/add',item)
         };
-        this.remove = function (item) {
-            return $http.post('/api/stats/remove',item)
+        this.remove = function () {
+            return $http.get('/api/stats/remove')
         };
         this.load = function() {
             return $http.get('/api/stats')

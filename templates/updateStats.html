@@ -45,20 +45,12 @@
     </tr>
 </table>
 
-<div class="row text-center" style="margin:20px auto;">
-    <button class="column" ng-click="toggleInput()">Add game stats</button>
-    <button class="large-6 column alert" ng-click="deleteRow()">Delete</button>
-    <select id="row2delete" style="height:50px;" class="large-6 column">
-        <option ng-repeat="game in gameStats | orderBy:'week'">Week: {{game.week}}</option>
-    </select>
-</div>
-
 <table class="display-table" id="add-stats" ng-show="_showInput">
     <tr>
-        <th ng-repeat="stat in stats">{{stat.key}}</th>
+        <th ng-repeat="stat in Ustats">{{stat.key}}</th>
     </tr>
     <tr>
-        <td ng-repeat="stat in stats">
+        <td ng-repeat="stat in Ustats">
             <input ng-model="stat.val" id="{{stat.key}}" type="text"/>
         </td>
     </tr>
@@ -68,7 +60,10 @@
         </td>
     </tr>
 </table>
-
+<div class="row text-center" style="margin:20px auto;">
+    <button class="column" ng-click="toggleInput()">Add game stats</button>
+    <button class="column alert" ng-click="deleteRow()">Delete most recent week</button>
+</div>
 <div class="row">
     <button class="large-6 column" ng-click="ratePlayers()">Rank</button>
     <select id="week2rate" style="height:50px;" class="large-6 column">
