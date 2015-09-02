@@ -46,11 +46,11 @@
 </table>
 
 <div class="row text-center" style="margin:20px auto;">
+    <button class="column" ng-click="toggleInput()">Add game stats</button>
     <button class="large-6 column alert" ng-click="deleteRow()">Delete</button>
     <select style="height:50px;" class="large-6 column">
         <option id="row2delete" ng-repeat="game in gameStats | orderBy:'week'">Week: {{game.week}}</option>
     </select>
-    <button class="column" ng-click="toggleInput()">Add game stats</button>
 </div>
 
 <table class="display-table" id="add-stats" ng-show="_showInput">
