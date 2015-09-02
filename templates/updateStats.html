@@ -1,0 +1,70 @@
+<table class="display-table">
+    <thead>
+    <tr>
+        <th>week</th>
+        <th>date</th>
+        <th>g</th>
+        <th>gs</th>
+        <th>passes completed</th>
+        <th>passes attempted</th>
+        <th>passing percent</th>
+        <th>passing average</th>
+        <th>passes 4 td</th>
+        <th>passes intercepted</th>
+        <th>passes sacked</th>
+        <th>passing sack yards</th>
+        <th>passing rate</th>
+        <th>rush attempts</th>
+        <th>rush yards</th>
+        <th>rushing avg</th>
+        <th>rush 4 td</th>
+        <th>fumbles</th>
+        <th>fumbles lost</th>
+    </tr>
+    </thead>
+    <tr ng-repeat="game in gameStats | orderBy:'week'">
+        <td>{{game.week}}</td>
+        <td>{{game.date}}</td>
+        <td>{{game.g}}</td>
+        <td>{{game.gs}}</td>
+        <td>{{game.passing_comp}}</td>
+        <td>{{game.passing_att}}</td>
+        <td>{{game.passing_pct}}</td>
+        <td>{{game.passing_avg}}</td>
+        <td>{{game.passing_td}}</td>
+        <td>{{game.passing_int}}</td>
+        <td>{{game.passing_sck}}</td>
+        <td>{{game.passing_scky}}</td>
+        <td>{{game.passing_rate}}</td>
+        <td>{{game.rushing_att}}</td>
+        <td>{{game.rushing_yds}}</td>
+        <td>{{game.rushing_avg}}</td>
+        <td>{{game.rushing_td}}</td>
+        <td>{{game.fumbles}}</td>
+        <td>{{game.fumbles_lost}}</td>
+    </tr>
+</table>
+
+<div class="row text-center" style="margin:20px auto;">
+    <button class="large-6 column alert" ng-click="deleteRow()">Delete</button>
+    <select style="height:50px;" class="large-6 column">
+        <option id="row2delete" ng-repeat="game in gameStats | orderBy:'week'">Week: {{game.week}}</option>
+    </select>
+    <button class="column" ng-click="toggleInput()">Add game stats</button>
+</div>
+
+<table class="display-table" id="add-stats" ng-show="_showInput">
+    <tr>
+        <th ng-repeat="stat in stats">{{stat.key}}</th>
+    </tr>
+    <tr>
+        <td ng-repeat="stat in stats">
+            <input ng-model="stat.val" id="{{stat.key}}" type="text"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="submit" value="Submit" ng-click="newStats()"/>
+        </td>
+    </tr>
+</table>
