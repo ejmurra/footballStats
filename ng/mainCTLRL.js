@@ -259,9 +259,9 @@ angular.module('winston')
         };
         $scope.ratePlayers = function() {
             var week = $('#week2rate').val().split(' ')[1];
+            var rated = [];
             $scope.rated = [];
             apiSVC.load().success(function(playersObj) {
-                console.log(playersObj);
                 $scope.players = playersObj.data.players;
                 $scope.games = playersObj.data.games;
                 $scope.gameStates = playersObj.data.winston;
@@ -273,7 +273,21 @@ angular.module('winston')
                 });
                 _.forEach($scope.players, function(player) {
                     accumulateStats(player,week);
-                    $scope.rated.push({"player":player.name,"rating":player.rating,"id":"p"+player.id})
+                    rated.push({
+                        "player":player.name,
+                        "rating":Math.round((player.rating + 0.00001) * 100) / 100,
+                        "id":"p"+player.id
+                    })
+                });
+                var ranked = _.sortBy(rated, function(player) {
+                    return player.rating;
+                });
+                ranked = _.filter(ranked, function(p){
+                    return p.rating;
+                });
+                _.forEach(ranked.reverse(),function(player, index) {
+                    player.rank = index + 1;
+                    $scope.rated.push(player);
                 });
             });
         }

@@ -61,8 +61,8 @@
     </tr>
 </table>
 <div class="row text-center" style="margin:20px auto;">
-    <button class="column" ng-click="toggleInput()">Add game stats</button>
-    <button class="column alert" ng-click="deleteRow()">Delete most recent week</button>
+    <button class="column large-10" ng-click="toggleInput()">Add game stats</button>
+    <button class="column alert large-2" ng-click="deleteRow()">Delete latest week</button>
 </div>
 <div class="row">
     <button class="large-6 column" ng-click="ratePlayers()">Rank</button>
@@ -75,11 +75,13 @@
     <table class="display-table">
         <tr>
             <th>Player</th>
-            <th>Rating</th>
+            <th>QB Rating</th>
+            <th>Rank</th>
         </tr>
         <tr id="{{player.id}}" ng-repeat="player in rated | orderBy: '-rating'">
             <td>{{player.player}}</td>
             <td>{{player.rating}}</td>
+            <td>{{player.rank}}</td>
         </tr>
     </table>
 </div>
