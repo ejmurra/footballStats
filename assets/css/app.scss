@@ -8,3 +8,31 @@
 #p1 {
   background-color: #008CBA;
 }
+
+svg {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.jameis {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+  z-index: 10;
+}
+
+.other {
+  fill: none;
+  stroke: lightgrey;
+  stroke-width: 1px;
+}
