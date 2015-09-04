@@ -445,7 +445,7 @@ angular.module('winston')
             var line = d3.svg.line()
                 .x(function(d) { return x(d.week)})
                 .y(function(d) { return y(d.rating)})
-                .interpolate('step-after');
+                .interpolate('basis');
             var svg = d3.select("#graph").select_or_append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
