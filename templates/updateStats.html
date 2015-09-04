@@ -67,10 +67,11 @@
     <button class="column alert large-2" ng-click="deleteRow()">Delete latest week</button>
 </div>
 <div class="row">
-    <button class="large-6 column" ng-click="ratePlayers()">Rank</button>
-    <select id="week2rate" style="height:50px;" class="large-6 column">
+    <button class="large-5 column" ng-click="ratePlayers()">Rank</button>
+    <select id="week2rate" style="height:50px;" class="large-5 column">
         <option ng-repeat="num in maxGames()">Week: {{num}}</option>
     </select>
+    <button class="large-2 column success" ng-click="dl()" ng-show="chartActive">Download chart</button>
 </div>
 
 <div id="graph" class="row"></div>
