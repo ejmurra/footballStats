@@ -8,6 +8,7 @@
         <th>passes completed</th>
         <th>passes attempted</th>
         <th>passing percent</th>
+        <th>passing yards</th>
         <th>passing average</th>
         <th>passes 4 td</th>
         <th>passes intercepted</th>
@@ -30,6 +31,7 @@
         <td>{{game.passing_comp}}</td>
         <td>{{game.passing_att}}</td>
         <td>{{game.passing_pct}}</td>
+        <td>{{game.passing_yds}}</td>
         <td>{{game.passing_avg}}</td>
         <td>{{game.passing_td}}</td>
         <td>{{game.passing_int}}</td>
@@ -61,7 +63,7 @@
     </tr>
 </table>
 <div class="row text-center" style="margin:20px auto;">
-    <button class="column large-10" ng-click="toggleInput()">Add game stats</button>
+    <button class="column large-10" ng-click="toggleInput()">Add JW game stats</button>
     <button class="column alert large-2" ng-click="deleteRow()">Delete latest week</button>
 </div>
 <div class="row">
@@ -76,14 +78,14 @@
 <div ng-show="rated">
     <table class="display-table">
         <tr>
+            <th>Rank</th>
             <th>Player</th>
             <th>QB Rating</th>
-            <th>Rank</th>
         </tr>
         <tr id="{{player.id}}" ng-repeat="player in rated | orderBy: '-rating'">
+            <td>{{player.rank}}</td>
             <td>{{player.player}}</td>
             <td>{{player.rating}}</td>
-            <td>{{player.rank}}</td>
         </tr>
     </table>
 </div>
