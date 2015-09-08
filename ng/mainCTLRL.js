@@ -309,8 +309,7 @@ angular.module('winston')
                     var ratings = [];
                     var statsCum;
                     _.forEach(player.games,function(game,index) {
-                        if (player.id == 3) console.log(index,game);
-                        if (!statsCum && game.g == 1) {
+                        if (!statsCum && game.g == 1 && game.passing_att) {
                             statsCum = {
                                 passing_comp:0,
                                 passing_yds: 0,
@@ -342,6 +341,10 @@ angular.module('winston')
                             }
                         } else if (!statsCum && !game.g) {
                             ratings.push({"week":index + 1,"rating":null,"pid":player.id})
+                        } else if (!statsCum && game.g == 1 && !game.passing_att) {
+                            var x = ratings[ratings.length -1];
+                            var y = {"week": x.week + 1,"rating": x.rating,"pid":player.id};
+                            ratings.push(y);
                         }
                         else {
                             if (game.passing_comp != null) statsCum.passing_comp += game.passing_comp;
@@ -372,9 +375,9 @@ angular.module('winston')
                     _.forEach(ratings, function(rating) {
                         ratingObj[rating.week] = rating;
                     });
-                    if (player.id == 3 ) {console.log(ratingObj);console.log(ratings)};
+
                     _.forEach(ratingObj, function(rating,i) {
-                        if (player.id == 3) console.log(rating,i);
+
                         if (!rating) {
                             if (i != 0) {
                                 rating = ratingObj[i-1];
@@ -401,10 +404,6 @@ angular.module('winston')
                 var ratings = _.values(getRatings(player));
                 //if (!player.id == 1) week += 3;
                 player.ratings = _.take(ratings, week);
-                if (player.id == 3) {
-                    console.log(ratings);
-                    console.log(player.ratings)
-                }
             });
             _.forEach($scope.players,function(player) {
                 player.className = 'jameis';
@@ -431,10 +430,14 @@ angular.module('winston')
                     }
                 });
             });
+            // This loop can be used to check if any didn't get rated
             //_.forEach($scope.players,function(player) {
-            //    console.log(player.name,player.ratings.length);
+            //    if (player.ratings.length < player.games.length) {
+            //        for (var i = 0; i < player.ratings.length; i++) {
+            //            console.log(player.name, player.ratings[i].week)
+            //        }
+            //    }
             //});
-
             var margin = {top: 20, right: 20, bottom: 30, left: 50};
             var width = 960 - margin.right - margin.left;
             var height = 500 - margin.top - margin.bottom;
@@ -452,8 +455,7 @@ angular.module('winston')
                 .select_or_append("g.container")
                 .attr("transform","translate(" + margin.left + "," + margin.top + ")");
             x.domain([1, Number(week)]);
-            y.domain([0,158.3]);
-
+            y.domain([0,160]);
 
             var lines = svg.select_or_append('g.lines').selectAll('path')
                 .data($scope.players.reverse(),function(d){if(d){/*console.log(d);*/return d.id;}});
@@ -472,14 +474,21 @@ angular.module('winston')
             svg.select_or_append("g.x")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + height + ")")
-                .call(xAxis);
+                .call(xAxis)
+                .select_or_append("text.xaxis")
+                .attr("y",25)
+                .attr("x",450)
+                .style("text-anchor","end")
+                .style("dy",".71em")
+                .text("Week");
 
             svg.select_or_append("g.y")
                 .attr("class", "y axis")
                 .call(yAxis)
                 .select_or_append("text.yaxis")
                 .attr("transform","rotate(-90)")
-                .attr("y",6)
+                .attr("y",-50)
+                .attr("x", -150)
                 .attr("dy", ".71em")
                 .style("text-anchor","end")
                 .text("QB Rating (cumulative)");

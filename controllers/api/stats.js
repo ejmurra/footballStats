@@ -20,7 +20,7 @@ router.get('/', function(req,res) {
                 players.push(row);
             });
             query1.on('end',function() {
-                var query2 = client.query("select * from game");
+                var query2 = client.query("select * from game order by week");
                 query2.on('row',function(row) {
                     games.push(row);
                 });
