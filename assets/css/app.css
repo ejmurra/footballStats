@@ -5,7 +5,14 @@
     line-height: 1em; }
 
 #p1 {
-  background-color: #008CBA; }
+  background-color: #D50A0A; }
+  #p1 td {
+    color: whitesmoke; }
+
+#p2 {
+  background-color: #002244; }
+  #p2 td {
+    color: whitesmoke; }
 
 svg {
   font: 10px sans-serif; }
