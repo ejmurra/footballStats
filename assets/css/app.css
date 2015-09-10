@@ -21,7 +21,13 @@ svg {
 
 .jameis {
   fill: none;
-  stroke: steelblue;
+  stroke: #D50A0A;
+  stroke-width: 1.5px;
+  z-index: 10; }
+
+.marcus {
+  fill: none;
+  stroke: #002244;
   stroke-width: 1.5px;
   z-index: 10; }
 
@@ -29,5 +35,8 @@ svg {
   fill: none;
   stroke: lightgrey;
   stroke-width: 1px; }
+
+.spacer {
+  height: 25px; }
 
 /*# sourceMappingURL=app.css.map */

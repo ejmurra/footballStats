@@ -8,5 +8,11 @@ angular.module('winston')
         };
         this.load = function() {
             return $http.get('/api/stats')
+        };
+        this.removeM = function() {
+            return $http.get('/api/stats/removem')
+        };
+        this.addNewM = function(item) {
+            return $http.post('/api/stats/addm',item)
         }
     });

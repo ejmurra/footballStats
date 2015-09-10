@@ -1,6 +1,7 @@
 angular.module('winston')
     .controller('mainCTRL',function($scope,apiSVC,preloadObj){
         $scope._showInput = false;
+        $scope._showInputM = false;
         var stats = function() {
             return [
                 {
@@ -167,8 +168,10 @@ angular.module('winston')
         };
         if (preloadObj.data.status == 'err') console.log(preloadObj.data.message);
         $scope.gameStats = preloadObj.data.data.winston;
+        $scope.mGameStats = preloadObj.data.data.mariota;
         $scope.stats = new stats();
         $scope.Ustats = new Ustats();
+        $scope.Mstats = new Ustats();
         $scope.newStats = function() {
             apiSVC.addNew($scope.Ustats).success(function(result){
                 if (result.status == "success") {
@@ -186,8 +189,39 @@ angular.module('winston')
 
             });
         };
+        $scope.newStats = function() {
+            apiSVC.addNewM($scope.Mstats).success(function(result){
+                if (result.status == "success") {
+                    $scope.Mstats = new Ustats();
+                    $scope.toggleInputM();
+                    apiSVC.load().success(function(data) {
+                        $scope.mGameStats = data.data.mariota;
+                    })
+                } else if (result.message.constraint == 'game_pk') {
+                    alert("Error: That game already exists in the database. Delete it first if you want to update it")
+                }
+                else {
+                    alert("Error: " + JSON.stringify(result.message.detail))
+                }
+
+            });
+        };
         $scope.toggleInput = function() {
             $scope._showInput = !$scope._showInput;
+        };
+        $scope.toggleInputM = function() {
+            $scope._showInputM = !$scope._showInputM;
+        };
+        $scope.deleteRowM = function() {
+            if ($scope.mGameStats != false) {
+                apiSVC.removeM().success(function(response){
+                    if (response.status == 'success') {
+                        apiSVC.load().success(function(data) {
+                            $scope.mGameStats = data.data.mariota;
+                        })
+                    }
+                })
+            }
         };
         $scope.deleteRow = function() {
             if ($scope.gameStats != false) {
@@ -406,8 +440,9 @@ angular.module('winston')
                 player.ratings = _.take(ratings, week);
             });
             _.forEach($scope.players,function(player) {
-                player.className = 'jameis';
-                if (player.id != 1) player.className = 'other';
+                player.className = 'other';
+                if (player.id === 1) player.className = 'jameis';
+                if (player.id === 2) player.className = 'marcus';
                 player.ratings.forEach(function(d,i) {
                     if (d) {
                         d.week = +d.week;

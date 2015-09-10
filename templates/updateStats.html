@@ -1,6 +1,6 @@
 
-<h5 class="row" style="position:fixed;bottom:0;">If you have any issues, call Eli Murray @ (815)985-8760</h5>
-
+<h5 class="row" style="position:fixed;bottom:0;left:15px;">If you have any issues, call Eli Murray @ (815)985-8760</h5>
+<h3 style="color:#D50A0A;">Jameis Winston: </h3>
 <table class="display-table">
     <thead>
     <tr>
@@ -65,10 +65,83 @@
         </td>
     </tr>
 </table>
+
 <div class="row text-center" style="margin:20px auto;">
     <button class="column large-10" ng-click="toggleInput()">Add JW game stats</button>
     <button class="column alert large-2" ng-click="deleteRow()">Delete latest week</button>
 </div>
+
+<h3 style="color:#002244;">Marcus Mariota: </h3>
+<table class="display-table">
+    <thead>
+    <tr>
+        <th>week</th>
+        <th>date</th>
+        <th>g</th>
+        <th>gs</th>
+        <th>passes completed</th>
+        <th>passes attempted</th>
+        <th>passing percent</th>
+        <th>passing yards</th>
+        <th>passing average</th>
+        <th>passes 4 td</th>
+        <th>passes intercepted</th>
+        <th>passes sacked</th>
+        <th>passing sack yards</th>
+        <th>passing rate</th>
+        <th>rush attempts</th>
+        <th>rush yards</th>
+        <th>rushing avg</th>
+        <th>rush 4 td</th>
+        <th>fumbles</th>
+        <th>fumbles lost</th>
+    </tr>
+    </thead>
+    <tr ng-repeat="game in mGameStats | orderBy:'week'">
+        <td>{{game.week}}</td>
+        <td>{{game.date}}</td>
+        <td>{{game.g}}</td>
+        <td>{{game.gs}}</td>
+        <td>{{game.passing_comp}}</td>
+        <td>{{game.passing_att}}</td>
+        <td>{{game.passing_pct}}</td>
+        <td>{{game.passing_yds}}</td>
+        <td>{{game.passing_avg}}</td>
+        <td>{{game.passing_td}}</td>
+        <td>{{game.passing_int}}</td>
+        <td>{{game.passing_sck}}</td>
+        <td>{{game.passing_scky}}</td>
+        <td>{{game.passing_rate}}</td>
+        <td>{{game.rushing_att}}</td>
+        <td>{{game.rushing_yds}}</td>
+        <td>{{game.rushing_avg}}</td>
+        <td>{{game.rushing_td}}</td>
+        <td>{{game.fumbles}}</td>
+        <td>{{game.fumbles_lost}}</td>
+    </tr>
+</table>
+
+<table class="display-table" id="add-statsM" ng-show="_showInputM">
+    <tr>
+        <th ng-repeat="stat in Mstats">{{stat.key}}</th>
+    </tr>
+    <tr>
+        <td ng-repeat="stat in Mstats">
+            <input ng-model="stat.val" id="{{stat.key}}-m" type="text"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="submit" value="Submit" ng-click="newStats()"/>
+        </td>
+    </tr>
+</table>
+
+<div class="row text-center" style="margin:20px auto;">
+    <button class="column large-10" ng-click="toggleInputM()">Add MM game stats</button>
+    <button class="column alert large-2" ng-click="deleteRowM()">Delete latest week</button>
+</div>
+
 <div class="row">
     <button class="large-5 column" ng-click="ratePlayers()">Rank</button>
     <select id="week2rate" style="height:50px;" class="large-5 column">
@@ -94,3 +167,4 @@
     </table>
 </div>
 
+<div class="spacer"></div>
