@@ -231,7 +231,7 @@ angular.module('winston')
                     }
                 })
             })
-
+            console.log($scope.players);
 
         }
     });
