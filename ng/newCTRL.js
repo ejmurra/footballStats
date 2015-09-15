@@ -158,6 +158,7 @@ angular.module('winston')
             }).enter().append("div").attr("class","controller").style({
                 border: "4px solid",
                 "border-color": function(d) {
+                    console.log(d.name,": ",colorMap[d.name].primary;)
                     return colorMap[d.name].primary;
                 }
             });
