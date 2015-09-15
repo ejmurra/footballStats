@@ -4,7 +4,7 @@ angular.module('winston')
         $stateProvider.state('home',{
             url: '/',
             templateUrl: 'updateStats.html',
-            controller: 'mainCTRL',
+            controller: 'newCTRL',
             resolve: {
                 preloadObj: function($http) {
                     return $http({method:'GET',url:'/api/stats'})

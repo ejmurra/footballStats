@@ -2,7 +2,7 @@ angular.module('winston')
     .controller('mainCTRL',function($scope,apiSVC,preloadObj){
         $scope._showInput = false;
         $scope._showInputM = false;
-        var stats = function() {
+        var TableHead = function() {
             return [
                 {
                     key: 'week',
@@ -86,7 +86,7 @@ angular.module('winston')
                 }
             ];
         };
-        var Ustats = function() {
+        var UpdateHead = function() {
             return [
                 {
                     key: 'date',
@@ -189,7 +189,7 @@ angular.module('winston')
 
             });
         };
-        $scope.newStats = function() {
+        $scope.newStatsM = function() {
             apiSVC.addNewM($scope.Mstats).success(function(result){
                 if (result.status == "success") {
                     $scope.Mstats = new Ustats();

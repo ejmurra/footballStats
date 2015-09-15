@@ -1,18 +1,12 @@
 angular.module('winston')
 .service('apiSVC', function($http) {
-        this.addNew = function (item) {
-            return $http.post('/api/stats/add',item)
+        this.add = function (params) {
+            return $http.get('/api/stats/add?' + params)
         };
-        this.remove = function () {
-            return $http.get('/api/stats/remove')
+        this.remove = function (params) {
+            return $http.get('/api/stats/remove?' + params)
         };
         this.load = function() {
             return $http.get('/api/stats')
         };
-        this.removeM = function() {
-            return $http.get('/api/stats/removem')
-        };
-        this.addNewM = function(item) {
-            return $http.post('/api/stats/addm',item)
-        }
     });

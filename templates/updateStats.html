@@ -1,7 +1,7 @@
 
 <h5 class="row" style="position:fixed;bottom:0;left:15px;">If you have any issues, call Eli Murray @ (815)985-8760</h5>
 <h3 style="color:#D50A0A;">Jameis Winston: </h3>
-<table class="display-table">
+<table id="jwin" class="display-table">
     <thead>
     <tr>
         <th>week</th>
@@ -26,7 +26,7 @@
         <th>fumbles lost</th>
     </tr>
     </thead>
-    <tr ng-repeat="game in gameStats | orderBy:'week'">
+    <tr ng-repeat="game in winston.games | orderBy:'week'">
         <td>{{game.week}}</td>
         <td>{{game.date}}</td>
         <td>{{game.g}}</td>
@@ -48,31 +48,45 @@
         <td>{{game.fumbles}}</td>
         <td>{{game.fumbles_lost}}</td>
     </tr>
+    <tr ng-show="winston.addStats">
+        <td><input ng-model="winston.new.week" type="text" placeholder="week"></td>
+        <td><input ng-model="winston.new.date" type="text" placeholder="date"></td>
+        <td><input ng-model="winston.new.g" type="text" placeholder="g"></td>
+        <td><input ng-model="winston.new.gs" type="text" placeholder="gs"></td>
+        <td><input ng-model="winston.new.passing_comp" type="text" placeholder="pass comp"></td>
+        <td><input ng-model="winston.new.passing_att" type="text" placeholder="pass att"></td>
+        <td><input ng-model="winston.new.passing_pct" type="text" placeholder="pass pct"></td>
+        <td><input ng-model="winston.new.passing_yds" type="text" placeholder="pass yds"></td>
+        <td><input ng-model="winston.new.passing_avg" type="text" placeholder="pass avg"></td>
+        <td><input ng-model="winston.new.passing_td" type="text" placeholder="pass td"></td>
+        <td><input ng-model="winston.new.passing_int" type="text" placeholder="pass int"></td>
+        <td><input ng-model="winston.new.passing_sck" type="text" placeholder="pass sck"></td>
+        <td><input ng-model="winston.new.passing_scky" type="text" placeholder="pass scky"></td>
+        <td><input ng-model="winston.new.passing_rate" type="text" placeholder="pass rate"></td>
+        <td><input ng-model="winston.new.rushing_att" type="text" placeholder="rush att"></td>
+        <td><input ng-model="winston.new.rushing_yds" type="text" placeholder="rush yds"></td>
+        <td><input ng-model="winston.new.rushing_avg" type="text" placeholder="rush avg"></td>
+        <td><input ng-model="winston.new.rushing_td" type="text" placeholder="rush td"></td>
+        <td><input ng-model="winston.new.fumbles" type="text" placeholder="fumbles"></td>
+        <td><input ng-model="winston.new.fumbles_lost" type="text" placeholder="fum lost"></td>
+    </tr>
 </table>
 
-<table class="display-table" id="add-stats" ng-show="_showInput">
-    <tr>
-        <th ng-repeat="stat in Ustats">{{stat.key}}</th>
-    </tr>
-    <tr>
-        <td ng-repeat="stat in Ustats">
-            <input ng-model="stat.val" id="{{stat.key}}" type="text"/>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <input type="submit" value="Submit" ng-click="newStats()"/>
-        </td>
-    </tr>
-</table>
+<div class="row" ng-show="winston.addStats">
+    <button class="column large-12 success" ng-click="addWinstonStats()">Submit stats</button>
+</div>
+
 
 <div class="row text-center" style="margin:20px auto;">
-    <button class="column large-10" ng-click="toggleInput()">Add JW game stats</button>
-    <button class="column alert large-2" ng-click="deleteRow()">Delete latest week</button>
+    <button class="column large-8" ng-click="toggleWinston()">Add JW game stats</button>
+    <button class="column alert large-2" ng-click="deleteWinston()">Delete</button>
+    <select style="height:50px;" class="column large-2" ng-model="winston.delete">
+        <option ng-repeat="game in winston.games">Week: {{game.week}}</option>
+    </select>
 </div>
 
 <h3 style="color:#002244;">Marcus Mariota: </h3>
-<table class="display-table">
+<table id="mmar" class="display-table">
     <thead>
     <tr>
         <th>week</th>
@@ -97,7 +111,7 @@
         <th>fumbles lost</th>
     </tr>
     </thead>
-    <tr ng-repeat="game in mGameStats | orderBy:'week'">
+    <tr ng-repeat="game in mariota.games | orderBy:'week'">
         <td>{{game.week}}</td>
         <td>{{game.date}}</td>
         <td>{{game.g}}</td>
@@ -119,50 +133,69 @@
         <td>{{game.fumbles}}</td>
         <td>{{game.fumbles_lost}}</td>
     </tr>
+    <tr ng-show="mariota.addStats">
+        <td><input ng-model="mariota.new.week" type="text" placeholder="week"></td>
+        <td><input ng-model="mariota.new.date" type="text" placeholder="date"></td>
+        <td><input ng-model="mariota.new.g" type="text" placeholder="g"></td>
+        <td><input ng-model="mariota.new.gs" type="text" placeholder="gs"></td>
+        <td><input ng-model="mariota.new.passing_comp" type="text" placeholder="pass comp"></td>
+        <td><input ng-model="mariota.new.passing_att" type="text" placeholder="pass att"></td>
+        <td><input ng-model="mariota.new.passing_pct" type="text" placeholder="pass pct"></td>
+        <td><input ng-model="mariota.new.passing_yds" type="text" placeholder="pass yds"></td>
+        <td><input ng-model="mariota.new.passing_avg" type="text" placeholder="pass avg"></td>
+        <td><input ng-model="mariota.new.passing_td" type="text" placeholder="pass td"></td>
+        <td><input ng-model="mariota.new.passing_int" type="text" placeholder="pass int"></td>
+        <td><input ng-model="mariota.new.passing_sck" type="text" placeholder="pass sck"></td>
+        <td><input ng-model="mariota.new.passing_scky" type="text" placeholder="pass scky"></td>
+        <td><input ng-model="mariota.new.passing_rate" type="text" placeholder="pass rate"></td>
+        <td><input ng-model="mariota.new.rushing_att" type="text" placeholder="rush att"></td>
+        <td><input ng-model="mariota.new.rushing_yds" type="text" placeholder="rush yds"></td>
+        <td><input ng-model="mariota.new.rushing_avg" type="text" placeholder="rush avg"></td>
+        <td><input ng-model="mariota.new.rushing_td" type="text" placeholder="rush td"></td>
+        <td><input ng-model="mariota.new.fumbles" type="text" placeholder="fumbles"></td>
+        <td><input ng-model="mariota.new.fumbles_lost" type="text" placeholder="fum lost"></td>
+    </tr>
 </table>
 
-<table class="display-table" id="add-statsM" ng-show="_showInputM">
-    <tr>
-        <th ng-repeat="stat in Mstats">{{stat.key}}</th>
-    </tr>
-    <tr>
-        <td ng-repeat="stat in Mstats">
-            <input ng-model="stat.val" id="{{stat.key}}-m" type="text"/>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <input type="submit" value="Submit" ng-click="newStats()"/>
-        </td>
-    </tr>
-</table>
+<div class="row" ng-show="mariota.addStats">
+    <button class="column large-12 success" ng-click="addMariotaStats()">Submit stats</button>
+</div>
+
 
 <div class="row text-center" style="margin:20px auto;">
-    <button class="column large-10" ng-click="toggleInputM()">Add MM game stats</button>
-    <button class="column alert large-2" ng-click="deleteRowM()">Delete latest week</button>
+    <button class="column large-8" ng-click="toggleMariota()">Add MM game stats</button>
+    <button class="column alert large-2" ng-click="deleteMariota()">Delete</button>
+    <select style="height:50px;" class="column large-2" ng-model="mariota.delete">
+        <option ng-repeat="game in mariota.games">Week: {{game.week}}</option>
+    </select>
 </div>
 
 <div class="row">
-    <button class="large-5 column" ng-click="ratePlayers()">Rank</button>
-    <select id="week2rate" style="height:50px;" class="large-5 column">
-        <option ng-repeat="num in maxGames()">Week: {{num}}</option>
+    <button class="large-8 column" ng-click="drawGraph()">Rank</button>
+    <select style="height:50px;" ng-model="graph.selected" class="large-4 column">
+        <option ng-repeat="num in graph.weeks">Week: {{num}}</option>
     </select>
     <button class="large-2 column success" ng-click="dl()" ng-show="chartActive">Download chart</button>
 </div>
 
 <div id="graph" class="row"></div>
+<div id="controlBox" class="row"></div>
 
-<div ng-show="rated">
+
+<div class="spacer"></div>
+
+<div ng-show="graph.data">
+    <h3 class="row" style="text-align:center;">Leaderboard</h3>
     <table class="display-table">
         <tr>
             <th>Rank</th>
             <th>Player</th>
             <th>QB Rating</th>
         </tr>
-        <tr id="{{player.id}}" ng-repeat="player in rated | orderBy: '-rating'">
-            <td>{{player.rank}}</td>
+        <tr id="{{player.player.split(' ').join('')}}" ng-repeat="player in rated | orderBy: '-rating.rating'">
+            <td>{{$index + 1}}</td>
             <td>{{player.player}}</td>
-            <td>{{player.rating}}</td>
+            <td>{{player.rating.rating}}</td>
         </tr>
     </table>
 </div>

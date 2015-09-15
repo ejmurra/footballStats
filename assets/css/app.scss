@@ -5,13 +5,13 @@
     line-height: 1em;
   }
 }
-#p1 {
+#JameisWinston {
   td {
     color: whitesmoke;
   }
   background-color: #D50A0A;
 }
-#p2 {
+#MarcusMariota {
   td {
     color: whitesmoke;
   }
@@ -48,7 +48,7 @@ svg {
   z-index: 10;
 }
 
-.other {
+.lines {
   fill: none;
   stroke: lightgrey;
   stroke-width: 1px;
@@ -56,4 +56,10 @@ svg {
 
 .spacer {
   height: 25px;
+}
+
+.controller {
+  display: inline-block;
+  margin: 4px;
+  padding: 5px;
 }

@@ -3,157 +3,199 @@ var pg = require('pg');
 var connect = require('../../auth');
 var _ = require('lodash');
 
+function formatResult(players,games,teams) {
+    var results = [];
+    var Player = function(player) {
+        //console.log(player);
+        this.id = player.id;
+        this.games = [];
+        this.rankings = [];
+        this.name = player.name;
+        this.team = _.filter(teams,function(team) {
+            return team.id == player.team_id;
+        });
+        this.colors = this.team[0].colors;
+        this.team = this.team[0].name;
+    };
+
+    function rate(stats) {
+        if (stats.passing_att != null && stats.passing_att != 0) {
+            // formula from https://en.wikipedia.org/wiki/Passer_rating
+            var a = (stats.passing_comp / stats.passing_att - .3) * 5;
+            var b = (stats.passing_yds / stats.passing_att - 3) * .25;
+            var c = (stats.passing_td / stats.passing_att) * 20;
+            var d = 2.375 - (stats.passing_int / stats.passing_att * 25);
+            if (a > 2.375) a = 2.375;
+            if (a < 0) a = 0;
+            if (b > 2.375) b = 2.375;
+            if (b < 0) b = 0;
+            if (c > 2.375) c = 2.375;
+            if (c < 0) c = 0;
+            if (d > 2.375) d = 2.375;
+            if (d < 0) d = 0;
+            return (a + b + c + d) / 6 * 100;
+        }
+    }
+
+    _.forEach(players,function(player) {
+        var cumulative = {
+            passing_comp:0,
+            passing_yds: 0,
+            passing_td: 0,
+            passing_att: 0,
+            passing_int: 0
+        };
+        var g = _.filter(games,function(game) {
+            return game.player == player.id;
+        });
+        player = new Player(player);
+        _.forEach(_.sortBy(g,"week"),function(g) {
+            player.games.push(g)
+        });
+
+        // Fill in bye weeks for other players
+        if (player.id !== 1 && player.id !== 2) {
+            var ALLWEEKS = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
+            var weeks = _.pluck(player.games,'week');
+            var missingWeeks = _.xor(weeks,ALLWEEKS);
+
+            _.forEach(missingWeeks,function(week) {
+                player.games.push({"week":week,"passing_comp":0,"passing_yds":0,"passing_td":0,"passing_att":0,"passing_int":0});
+            });
+
+            player.games = _.sortBy(player.games,'week');
+        }
+
+        _.forEach(player.games, function(game) {
+            var base = cumulative;
+            var gp = game.passing_comp;
+            if (game.passing_comp !== null) cumulative.passing_comp += game.passing_comp;
+            if (game.passing_yds !== null) cumulative.passing_yds += game.passing_yds;
+            if (game.passing_td !== null) cumulative.passing_td += game.passing_td;
+            if (game.passing_att !== null) cumulative.passing_att += game.passing_att;
+            if (game.passing_int !== null) cumulative.passing_int += game.passing_int;
+            if (cumulative.passing_att != 0) {
+                player.rankings.push({"week":game.week,"rating":Math.round((rate(cumulative) + 0.00001) * 100) / 100})
+            } else {
+                player.rankings.push({"week":game.week,"rating":null})
+            }
+
+        });
+        results.push(player);
+    });
+    return _.sortBy(results,'id');
+}
+
+
 router.get('/', function(req,res) {
     var client = new pg.Client(connect);
     client.connect(function(err) {
-        var winston = [];
+        if (err) res.send({"status":"err","message":"Could not connect to db"});
         var players = [];
         var games = [];
-        if (err) res.send({"status":"err","message":"could not connect to db"});
-        var query = client.query("select * from game where player = 1");
-        query.on('row',function(row) {
-            winston.push(row)
+        var teams = [];
+        var q1 = client.query("select * from player");
+        q1.on("row",function(row) {
+            players.push(row)
         });
-        query.on('end',function() {
-            var query1 = client.query("select * from player");
-            query1.on('row',function(row) {
-                players.push(row);
+        q1.on("end",function() {
+            var q2 = client.query("select * from game");
+            q2.on("row",function(row) {
+                games.push(row);
             });
-            query1.on('end',function() {
-                var query2 = client.query("select * from game order by week");
-                query2.on('row',function(row) {
-                    games.push(row);
+            q2.on("end",function() {
+                var q3 = client.query("select * from team");
+                q3.on("row",function(row) {
+                    var colors = {
+                        primary: row.colors[0],
+                        secondary: row.colors[1]
+                    };
+                    if (row.colors[3]) {
+                        colors.accents = row.colors.slice(3);
+                    }
+                    teams.push(
+                        {id:row.id,
+                            name:row.name,
+                            colors: JSON.stringify(colors)
+                        });
                 });
-                query2.on('end',function() {
-                    var q3 = client.query("select * from game where player = 2");
-                    var mariota = [];
-                    q3.on("row",function(row) {
-                        mariota.push(row);
-                    });
-                    q3.on("end",function() {
-                        res.send({"status":"success","data":{"players":players,"games":games,"winston":winston,"mariota":mariota}});
-                    });
+                q3.on("end",function() {
+                    var data = formatResult(players,games,teams);
+                    res.send({"status":"success","data": data});
                 })
-            });
-        })
-    })
+            })
+        });
+    });
 });
 
 router.get('/remove',function(req,res) {
+    var player = Number(req.query.player);
+    var week = Number(req.query.week);
     var client = new pg.Client(connect);
     client.connect(function(err) {
-        var week = 0;
-        if (err) res.send({"status":"err","message":"could not connect to db"});
-        var preQ = client.query('select week from game where player = 1');
-        preQ.on('row',function(row) {
-            if (row.week >= week) week = row.week
+        if (err) res.send({"status":"err","message":"Could not connect to db"});
+        var q = client.query({
+            text: "delete from game where player = $1 and week = $2",
+            values: [player, week]
         });
-        preQ.on('end', function() {
-            var query = client.query({
-                text: "delete from game where player = 1 and week = $1",
-                values: [week]
-            });
-            query.on('end',function() {
-                res.send({"status":"success"})
-            });
-        });
-    });
-});
-
-router.get('/removem',function(req,res) {
-    var client = new pg.Client(connect);
-    console.log("REMOVE MARIOTA")
-    client.connect(function(err) {
-        var week = 0;
-        if (err) res.send({"status":"err","message":"could not connect to db"});
-        var preQ = client.query('select week from game where player = 2');
-        preQ.on('row',function(row) {
-            if (row.week >= week) week = row.week
-        });
-        preQ.on('end', function() {
-            var query = client.query({
-                text: "delete from game where player = 2 and week = $1",
-                values: [week]
-            });
-            query.on('end',function() {
-                res.send({"status":"success"})
-            });
-        });
-    });
-});
-
-router.post('/add', function(req,res) {
-    var client = new pg.Client(connect);
-    var stats = {};
-    var week = 0;
-    _.forEach(req.body,function(obj) {
-        stats[obj.key] = obj.val;
-    });
-    client.connect(function(err) {
-        if (err) res.send({"status":"err","message":"could not connect to db"});
-        var preQ = client.query('select week from game where player = 1');
-        preQ.on('row',function(row) {
-            if (row.week >= week) week = row.week
-        });
-        preQ.on('end',function() {
-            week = week+1;
-            var query = client.query({
-                text: 'INSERT into game (player,season,week,date,g,gs,passing_comp,passing_att,passing_pct,passing_yds,passing_avg,' +
-                'passing_td,passing_int,passing_sck,passing_scky,passing_rate,rushing_att,rushing_yds,rushing_avg,rushing_td,fumbles,' +
-                'fumbles_lost) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)',
-                values: [1,2015,week,stats.date,stats.g,stats.gs,stats.pass_comp,stats.pass_att,stats.pass_pct,stats.pass_yds,
-                    stats.pass_avg,stats.pass_td,stats.pass_int,stats.pass_sck,stats.pass_scky,stats.pass_rate,stats.rush_att,stats.rush_yds,
-                    stats.rush_avg,stats.rush_td,stats.fum,stats.fum_lost]
-            });
-            query.on('error',function(err){
-                res.send({"status":"err","message":err});
-                client.end();
-            });
-            query.on('end', function(result) {
-                res.send({"status":"success"});
-                client.end();
-            })
+        q.on('end',function() {
+            res.send({"status":"success"})
         })
-
     });
-
 });
 
-router.post('/addm', function(req,res) {
+router.get('/add', function(req, res) {
     var client = new pg.Client(connect);
-    var week = 0;
-    var stats = {};
-    _.forEach(req.body,function(obj) {
-        stats[obj.key] = obj.val;
+    var nums = ['player','week','g','gs','pass_comp','pass_att','pass_pct','pass_yds','pass_avg','pass_td','pass_int',
+    'pass_sck','pass_scky','pass_rate','rush_att','rush_yds','rush_avg','rush_td','fum','fum_lost'];
+    var nulls = [];
+    _.forEach(req.query,function(val,key) {
+        _.forEach(nums,function(k) {
+            if (key == k && val == null) nulls.push(key)
+        })
     });
     client.connect(function(err) {
         if (err) res.send({"status":"err","message":"could not connect to db"});
-        var preQ = client.query('select week from game where player = 2');
-        preQ.on('row',function(row) {
-            if (row.week >= week) week = row.week
+        var includes = [];
+        var qString = function() {
+            var string = 'insert into game (';
+            _.forEach(req.query, function (val, key) {
+                if (val !== null) includes.push(key);
+            });
+            string += includes.join(',');
+            string += ") VALUES (";
+            for (var i = 1; i <= includes.length; i++) {
+                string += "$" + i + ',';
+            }
+            string = string.substring(0,string.length-1) + ")";
+            return string;
+        };
+        var vals = function() {
+            var values = [];
+            var x = [];
+            _.forEach(includes,function(item) {
+                values.push({"key":item,"val":req.query[item]})
+            });
+            values.map(function(val) {
+                var isNum = _.filter(nums,function(num) {
+                    return val.key === num
+                });
+                if (_.isEmpty(isNum)) {
+                    x.push(val.val)
+                } else {
+                    x.push(Number(val.val))
+                }
+            });
+            return x
+        };
+        var x = qString();
+        var q = client.query(x,vals());
+        q.on("error",function(err) {
+            res.send({"status":"err","message":err})
         });
-        preQ.on('end',function() {
-            week = week+1;
-            var query = client.query({
-                text: 'INSERT into game (player,season,week,date,g,gs,passing_comp,passing_att,passing_pct,passing_yds,passing_avg,' +
-                'passing_td,passing_int,passing_sck,passing_scky,passing_rate,rushing_att,rushing_yds,rushing_avg,rushing_td,fumbles,' +
-                'fumbles_lost) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)',
-                values: [2,2015,week,stats.date,stats.g,stats.gs,stats.pass_comp,stats.pass_att,stats.pass_pct,stats.pass_yds,
-                    stats.pass_avg,stats.pass_td,stats.pass_int,stats.pass_sck,stats.pass_scky,stats.pass_rate,stats.rush_att,stats.rush_yds,
-                    stats.rush_avg,stats.rush_td,stats.fum,stats.fum_lost]
-            });
-            query.on('error',function(err){
-                res.send({"status":"err","message":err});
-                client.end();
-            });
-            query.on('end', function(result) {
-                res.send({"status":"success"});
-                client.end();
-            })
+        q.on("end",function() {
+            res.send({"status":"success"})
         })
-
-    });
-
+    })
 });
-
 module.exports = router;

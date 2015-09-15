@@ -4,14 +4,14 @@
     font-size: .7em;
     line-height: 1em; }
 
-#p1 {
+#JameisWinston {
   background-color: #D50A0A; }
-  #p1 td {
+  #JameisWinston td {
     color: whitesmoke; }
 
-#p2 {
+#MarcusMariota {
   background-color: #002244; }
-  #p2 td {
+  #MarcusMariota td {
     color: whitesmoke; }
 
 svg {
@@ -38,12 +38,17 @@ svg {
   stroke-width: 1.5px;
   z-index: 10; }
 
-.other {
+.lines {
   fill: none;
   stroke: lightgrey;
   stroke-width: 1px; }
 
 .spacer {
   height: 25px; }
+
+.controller {
+  display: inline-block;
+  margin: 4px;
+  padding: 5px; }
 
 /*# sourceMappingURL=app.css.map */
