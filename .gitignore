@@ -49,3 +49,5 @@ crashlytics-build.properties
 
 auth.js
 node_modules
+
+assets/app.js

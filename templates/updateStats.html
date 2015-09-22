@@ -179,23 +179,18 @@
 </div>
 
 <div id="graph" class="row"></div>
-<div id="controlBox" class="row"></div>
+<!--<div id="controlBox" class="row"></div>-->
 
 
 <div class="spacer"></div>
 
 <div ng-show="graph.data">
     <h3 class="row" style="text-align:center;">Leaderboard</h3>
-    <table class="display-table">
+    <table id="controlBox" class="display-table">
         <tr>
             <th>Rank</th>
             <th>Player</th>
             <th>QB Rating</th>
-        </tr>
-        <tr id="{{player.player.split(' ').join('')}}" ng-repeat="player in rated | orderBy: '-rating.rating'">
-            <td>{{$index + 1}}</td>
-            <td>{{player.player}}</td>
-            <td>{{player.rating.rating}}</td>
         </tr>
     </table>
 </div>

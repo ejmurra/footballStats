@@ -152,17 +152,26 @@ angular.module('winston')
             _.forEach($scope.players,function(player) {
                 colorMap[player.name] = JSON.parse(player.colors);
             });
+            var test = _.forEach($scope.graph.data,function(player) {
+                var gi = 0;
+                player.currentRating = null;
+                _.forEach(player.ratings,function(rate) {
+                    if(rate.week > gi && rate.rating !== null) {
+                        player.currentRating = rate.rating;
+                        gi = rate.week
+                    }
+                })
+                console.log(player);
+            })
+            var controls = d3.select("#controlBox").selectAll("tr").data($scope.graph.data)
+                .enter().append("tr").attr("class",function(d){return d.name})
 
-            var controls = d3.select("#controlBox").selectAll("div").data($scope.graph.data, function(d) {
-                if (d) return d.name;
-            }).enter().append("div").attr("class","controller").style({
-                border: "4px solid",
-                "border-color": function(d) {
-                    return colorMap[d.name].primary;
-                }
+            controls.append("td").html(function(d){
+                try {
+                    var current = d.ratings[d.ratings.length - 1].rating
+                    return current
+                } catch(e) {}
             });
-
-            controls.append("div").html(function(d){return d.name});
 
             controls.on("mouseover",function() {
                 d3.select(this).style({
