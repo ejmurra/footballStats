@@ -76,24 +76,139 @@ angular.module('winston')
         };
 
         $scope.drawGraph = function() {
-            $scope.graph.data = [];
-            $scope.rated = [];
-            var week = $scope.graph.selected.split(' ')[1];
-            _.forEach($scope.players,function(player) {
-                var x = {name:player.name,ratings: _.take(player.rankings, week),selected: false};
-                $scope.graph.data.push(x);
-            });
-            _.forEach($scope.graph.data, function(player) {
-                if (player.ratings[player.ratings.length - 1]) {
-                    if (player.ratings[player.ratings.length-1]["rating"] !== null) {
-                        $scope.rated.push({
-                            player: player.name,
-                            rating: player.ratings[player.ratings.length - 1],
-                            selected: false
-                        });
+            d3.select('#controlBox').selectAll('tr').remove();
+            $scope.graph.data = $scope.graph.data || [];
+            var week = $scope.graph.selectedWeek.split(' ')[1];
+            if (_.isEmpty($scope.graph.data)) {
+                (function preparePlayers(week) {
+                    _.forEach($scope.players,function(player) {
+                        var x = {name:player.name,ratings: _.take(player.rankings, week),selected: false, colors: player.colors};
+                        $scope.graph.data.push(x);
+                    });
+                    var ratedPlayers = [];
+                    _.forEach($scope.graph.data, function(player) {
+                        if (player.ratings[player.ratings.length - 1] && player.ratings[player.ratings.length - 1]["rating"] !== null) {
+                            ratedPlayers.push({
+                                player: player.name,
+                                currentRating: player.ratings[player.ratings.length - 1].rating,
+                                selected: false,
+                                ratings: player.ratings,
+                                colors: player.colors
+                            });
+                        }
+                    });
+
+                    $scope.graph.data = _.forEach(_.sortByOrder(ratedPlayers,'currentRating','desc'),function(player,index) {
+                        player.rank = index + 1;
+                        player.primary = JSON.parse(player.colors).primary;
+                        player.secondary = JSON.parse(player.colors).secondary;
+                        delete player.colors
+                    });
+                })(week);
+            } else {
+                var tempGraphData = [];
+                console.log($scope.graph);
+                (function preparePlayers(week) {
+                    var selectedPlayers = _.pluck(_.filter($scope.graph.data,'selected'),'player');
+                    _.forEach($scope.players, function(player) {
+                        var x = {
+                            name: player.name,
+                            ratings: _.take(player.rankings, week),
+                            selected: _.includes(selectedPlayers,player.player),
+                            colors: player.colors
+                        };
+                        tempGraphData.push(x)
+                    });
+                    var ratedPlayers = [];
+                    _.forEach(tempGraphData, function(player) {
+                        if (player.ratings[player.ratings.length - 1] && player.ratings[player.ratings.length - 1]["rating"] !== null) {
+                            ratedPlayers.push({
+                                player: player.name,
+                                currentRating: player.ratings[player.ratings.length - 1].rating,
+                                selected: _.includes(selectedPlayers, player.name),
+                                ratings: player.ratings,
+                                colors: player.colors
+                            });
+                        }
+                    });
+                    $scope.graph.data = _.forEach(_.sortByOrder(ratedPlayers,'currentRating','desc'),function(player,index) {
+                        player.rank = index + 1;
+                        player.primary = JSON.parse(player.colors).primary;
+                        player.secondary = JSON.parse(player.colors).secondary;
+                        delete player.colors
+                    });
+                console.log($scope.graph);
+                })(week)
+            }
+
+            // CONTROLS
+            //var controls = d3.select("#controlBox").selectAll("tr").data($scope.graph.data,function(d){ return d.player});
+            //var player = controls.enter().append("tr").attr("class",function(d){return d.player});
+            //
+            //player.select_or_append("td.rank").html(function(d){
+            //    return d.rank
+            //});
+            //player.select_or_append("td.name").html(function(d) {
+            //    return d.player
+            //});
+            //player.select_or_append("td.rate").html(function(d) {
+            //    return d.currentRating
+            //});
+            //player.exit().remove();
+            var controls = d3.select('#controlBox').selectAll('tr').data($scope.graph.data,function(d){ return d.player});
+            controls.enter()
+                .append('tr')
+                .style({
+                    "background-color":function(d) {
+                        if (d.selected) return d.primary;
                     }
+                })
+                //.attr('position', function(d) {return d.rank})
+
+            controls.select_or_append("td.rank").html(function(d){
+                return d.rank
+            }).style({
+                "color": function(d) {
+                    if (d.selected) return "whitesmoke";
                 }
             });
+            controls.select_or_append("td.name").html(function(d) {
+                return d.player
+            }).style({
+                "color": function(d) {
+                    if (d.selected) return "whitesmoke";
+                }
+            });
+            controls.select_or_append("td.rate").html(function(d) {
+                return d.currentRating
+            }).style({
+                "color": function(d) {
+                    if (d.selected) return "whitesmoke";
+                }
+            });
+
+            controls.on("mouseover",function() {
+                d3.select(this).style({
+                    "background-color": function(d) {
+                        return d.primary;
+                    }
+                }).selectAll('td').style("color","whitesmoke");
+            });
+
+            controls.on("mouseout",function(d) {
+                if (!d.selected) {
+                    d3.select(this).style({
+                        "background-color": "white"
+                    }).selectAll('td').style("color","black");
+                }
+            });
+
+            controls.on("click",function(d) {
+                d.selected = !d.selected;
+                updateGraph();
+            });
+
+
 
             // LINE CHART
             var margin = {top: 20, right: 20, bottom: 30, left: 50};
@@ -107,23 +222,125 @@ angular.module('winston')
             var line = d3.svg.line().x(function(d){ return x(d.week)}).y(function(d){ return y(d.rating)})
                 .interpolate('basis');
 
-
-
             var svg = d3.select("#graph").select_or_append("svg").attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom).select_or_append("g.container")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            updateGraph();
 
-            var lines = svg.select_or_append("g.lines").selectAll('path').data($scope.graph.data.reverse(),function(d) {
-                if (d) return d.name;
-            });
+            function updateGraph() {
+                var deselectedLines = svg.select_or_append("g.lines.deselected").selectAll('path')
+                    .data(_.filter($scope.graph.data,function(player){
+                        return !player.selected
+                    }), function(d) {
+                        return d.player
+                    });
 
-            lines.enter().append('path')
-                .attr("class",function(d) { return d.name + " lines"; })
-                .attr("d", function(d) { return line(d.ratings)});
+                deselectedLines.enter().append('path')
+                    .attr("class","unselected")
+                    .style({
+                        "stroke":"lightgrey"
+                    })
+                    .attr("d", function(d) { return line(d.ratings)});
 
-            lines.transition().attr("d", function(d) { return line(d.ratings)})
+                deselectedLines.transition().attr("d", function(d) { return line(d.ratings)});
+                //controls.on("mouseover",function() {
+                //    d3.select(this).style({
+                //        "background-color": function(d) {
+                //            return d.primary;
+                //        }
+                //    }).selectAll('td').style("color","whitesmoke");
+                //});
+                //
+                //controls.on("mouseout",function(d) {
+                //    if (!d.selected) {
+                //        d3.select(this).style({
+                //            "background-color": "white"
+                //        }).selectAll('td').style("color","black");
+                //    }
+                //});
+                //
+                //controls.on("click",function(d) {
+                //    d.selected = !d.selected;
+                //    updateGraph();
+                //});
+                var offset = {
+                    x: 5,
+                    y: 10
+                }
+                function addToolTip(data) {
+                    var container = d3.select('body').append('div').datum(data)
+                        .attr('class','tooltip-container')
+                        .call(initTT)
 
-            lines.exit().remove();
+                    container.style('left', d3.event.pageX + offset.x + 'px')
+                        .style('top',d3.event.pageY + offset.y + 'px')
+                }
+
+                function initTT(selection) {
+                    selection.each(function(data) {
+                        d3.select(this).attr('class','tooltip-container')
+                            .style('width','150px');
+
+                        d3.select(this).append('p').attr('class','tooltip-title').text(data.player);
+
+                        d3.select(this).append('p').attr('class','tooltip-content').text("Rating: " + data.currentRating);
+                        d3.select(this).append('p').attr('class','tooltip-content').text("Rank: " + data.rank)
+                    })
+                }
+
+                deselectedLines.on("mouseover", function(d) {
+                    d3.select(this).style({
+                        "stroke":function(d) {
+                            return d.primary
+                        },
+                        "stroke-width":"3px"
+                    })
+                    addToolTip(d)
+                })
+
+                function moveToolTip() {
+                    d3.select('body').select('div.tooltip-container')
+                        .style('left', (d3.event.pageX + offset.x) + 'px')
+                        .style('top', (d3.event.pageY + offset.y) + 'px')
+                }
+
+                function removeToolTip() {
+                    d3.select('div.tooltip-container').remove()
+                }
+
+                deselectedLines.on("mouseout", function(d) {
+                    d3.select(this).style({
+                        "stroke":"lightgrey",
+                        "stroke-width":"2px"
+                    })
+                    removeToolTip(d)
+                })
+
+                deselectedLines.on("mousemove", moveToolTip)
+
+                deselectedLines.exit().remove();
+
+                var selectedLines = svg.select_or_append("g.lines.selected").selectAll('path')
+                    .data(_.filter($scope.graph.data,function(player){
+                        return player.selected
+                    }), function(d) {
+                        return d.player
+                    });
+
+                selectedLines.enter().append('path')
+                    .attr("class","selected")
+                    .style({
+                        "stroke": function(d){
+                            console.log(d.player + " : " + d.primary);
+                            return d.primary;
+                        }
+                    })
+                    .attr("d",function(d) { return line(d.ratings)});
+
+                selectedLines.transition().attr("d", function(d) { return line(d.ratings)});
+
+                selectedLines.exit().remove();
+            }
 
             svg.select_or_append("g.x")
                 .attr("class", "x axis")
@@ -147,98 +364,6 @@ angular.module('winston')
                 .style("text-anchor","end")
                 .text("QB Rating (cumulative)");
 
-            // CONTROLS
-            var colorMap = {};
-            _.forEach($scope.players,function(player) {
-                colorMap[player.name] = JSON.parse(player.colors);
-            });
-            var test = _.forEach($scope.graph.data,function(player) {
-                var gi = 0;
-                player.currentRating = null;
-                _.forEach(player.ratings,function(rate) {
-                    if(rate.week > gi && rate.rating !== null) {
-                        player.currentRating = rate.rating;
-                        gi = rate.week
-                    }
-                })
-                console.log(player);
-            })
-            var controls = d3.select("#controlBox").selectAll("tr").data($scope.graph.data)
-                .enter().append("tr").attr("class",function(d){return d.name})
 
-            controls.append("td").html(function(d){
-                try {
-                    var current = d.ratings[d.ratings.length - 1].rating
-                    return current
-                } catch(e) {}
-            });
-
-            controls.on("mouseover",function() {
-                d3.select(this).style({
-                    "border-color": function(d) {
-                        return colorMap[d.name].secondary;
-                    },
-                    "background-color": function(d) {
-                        return colorMap[d.name].primary;
-                    }
-                }).selectAll('div').style("color","whitesmoke");
-            });
-
-            controls.on("mouseout",function(control) {
-                if (!control.selected) {
-                    d3.select(this).style({
-                        "border-color": function(d) {
-                            return colorMap[d.name].primary;
-                        },
-                        "background-color": "white"
-                    }).selectAll('div').style("color","black");
-                }
-            });
-
-            controls.on("click",function() {
-                var selectedP = d3.select(this).selectAll("div").html();
-                var gdata = _.filter($scope.graph.data,function(d) {
-                    return d.name === selectedP
-                })
-                _.forEach(gdata,function(player){
-                    player.selected = !player.selected;
-                })
-                controls.each(function(d) {
-                    if (d.name === selectedP || d.selected) {
-                        d3.select(this).style({
-                            "border-color": function(d) {
-                                return colorMap[d.name].secondary;
-                            },
-                            "background-color": function(d) {
-                                return colorMap[d.name].primary;
-                            }
-                        }).selectAll('div').style("color","whitesmoke");
-                    } else {
-                        d3.select(this).style({
-                            "border-color": function(d) {
-                                return colorMap[d.name].primary;
-                            },
-                            "background-color": "white"
-                        }).selectAll('div').style("color","black");
-                    }
-                });
-                lines.each(function(d) {
-                    if (d.selected) {
-                        d3.select(this).style({
-                            "stroke-width": "3px",
-                            "stroke": function(d) {
-                                return colorMap[d.name].primary;
-                            },
-                            "z-index": "10"
-                        })
-                    } else {
-                        d3.select(this).style({
-                            "stroke-width":"1px",
-                            "stroke": "lightgrey",
-                            "z-index": "0"
-                        })
-                    }
-                })
-            })
         }
     });

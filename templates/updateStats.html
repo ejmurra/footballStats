@@ -172,7 +172,7 @@
 
 <div class="row">
     <button class="large-8 column" ng-click="drawGraph()">Rank</button>
-    <select style="height:50px;" ng-model="graph.selected" class="large-4 column">
+    <select style="height:50px;" ng-model="graph.selectedWeek" class="large-4 column">
         <option ng-repeat="num in graph.weeks">Week: {{num}}</option>
     </select>
     <button class="large-2 column success" ng-click="dl()" ng-show="chartActive">Download chart</button>
@@ -186,12 +186,17 @@
 
 <div ng-show="graph.data">
     <h3 class="row" style="text-align:center;">Leaderboard</h3>
-    <table id="controlBox" class="display-table">
-        <tr>
-            <th>Rank</th>
-            <th>Player</th>
-            <th>QB Rating</th>
-        </tr>
+    <table class="display-table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>QB Rating</th>
+            </tr>
+        </thead>
+        <tbody id="controlBox">
+
+        </tbody>
     </table>
 </div>
 
