@@ -2,6 +2,32 @@ var router = require('express').Router();
 var pg = require('pg');
 var connect = require('../../auth');
 var _ = require('lodash');
+var s3 = require('s3');
+var fs = require('fs-extra');
+var path = require('path');
+
+var s3Client = s3.createClient({
+    s3Options: require('../../s3_credentials.js')
+});
+var params = {
+    localFile: path.resolve(__dirname,"../../data.json"),
+    s3Params: require('../../deploy.js')
+}
+
+function makeAndUpload(data,res) {
+    console.log('got data');
+    fs.writeJSONSync(path.resolve(__dirname,'../../data.json'),data);
+    console.log("wrote json");
+    var x = s3Client.uploadFile(params);
+    x.on("error", function(err) {
+        console.log("error: " + err)
+    });
+
+    x.on("end", function() {
+        console.log('uploaded');
+        res.send({"status":"success"})
+    })
+}
 
 function formatResult(players,games,teams) {
     var results = [];
@@ -139,7 +165,40 @@ router.get('/remove',function(req,res) {
             values: [player, week]
         });
         q.on('end',function() {
-            res.send({"status":"success"})
+            var players = [];
+            var games = [];
+            var teams = [];
+            var q1 = client.query("select * from player");
+            q1.on("row",function(row) {
+                players.push(row)
+            });
+            q1.on("end",function() {
+                var q2 = client.query("select * from game");
+                q2.on("row",function(row) {
+                    games.push(row);
+                });
+                q2.on("end",function() {
+                    var q3 = client.query("select * from team");
+                    q3.on("row",function(row) {
+                        var colors = {
+                            primary: row.colors[0],
+                            secondary: row.colors[1]
+                        };
+                        if (row.colors[3]) {
+                            colors.accents = row.colors.slice(3);
+                        }
+                        teams.push(
+                            {id:row.id,
+                                name:row.name,
+                                colors: JSON.stringify(colors)
+                            });
+                    });
+                    q3.on("end",function() {
+                        var data = formatResult(players,games,teams);
+                        makeAndUpload(data,res)
+                    })
+                })
+            });
         })
     });
 });
@@ -194,7 +253,40 @@ router.get('/add', function(req, res) {
             res.send({"status":"err","message":err})
         });
         q.on("end",function() {
-            res.send({"status":"success"})
+            var players = [];
+            var games = [];
+            var teams = [];
+            var q1 = client.query("select * from player");
+            q1.on("row",function(row) {
+                players.push(row)
+            });
+            q1.on("end",function() {
+                var q2 = client.query("select * from game");
+                q2.on("row",function(row) {
+                    games.push(row);
+                });
+                q2.on("end",function() {
+                    var q3 = client.query("select * from team");
+                    q3.on("row",function(row) {
+                        var colors = {
+                            primary: row.colors[0],
+                            secondary: row.colors[1]
+                        };
+                        if (row.colors[3]) {
+                            colors.accents = row.colors.slice(3);
+                        }
+                        teams.push(
+                            {id:row.id,
+                                name:row.name,
+                                colors: JSON.stringify(colors)
+                            });
+                    });
+                    q3.on("end",function() {
+                        var data = formatResult(players,games,teams);
+                        makeAndUpload(data,res)
+                    })
+                })
+            });
         })
     })
 });

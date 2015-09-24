@@ -9,10 +9,6 @@ liveserver.watch(__dirname + '/assets');
 
 app.set('env','production');
 app.set('x-powered-by', false);
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", '*');
-    next()
-})
 
 app.use(bodyParser.json());
 

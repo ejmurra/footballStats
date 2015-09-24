@@ -51,3 +51,8 @@ auth.js
 node_modules
 
 assets/app.js
+
+deploy.js
+s3_credentials.js
+
+data.json
