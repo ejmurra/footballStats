@@ -32,11 +32,12 @@ function makeAndUpload(data,res) {
 function formatResult(players,games,teams) {
     var results = [];
     var Player = function(player) {
-        //console.log(player);
+        console.log(player);
         this.id = player.id;
         this.games = [];
         this.rankings = [];
         this.name = player.name;
+        this.year_drafted = player.year_drafted
         this.team = _.filter(teams,function(team) {
             return team.id == player.team_id;
         });
