@@ -32,7 +32,6 @@ function makeAndUpload(data,res) {
 function formatResult(players,games,teams) {
     var results = [];
     var Player = function(player) {
-        console.log(player);
         this.id = player.id;
         this.games = [];
         this.rankings = [];
